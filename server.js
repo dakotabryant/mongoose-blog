@@ -2,17 +2,12 @@
 const bodyParser = require('body-parser');
 const express = require('express');
 const mongoose = require('mongoose');
-const morgan = require('morgan');
+
 
 mongoose.Promise = global.Promise;
 
-const {
-	DATABASE_URL,
-	PORT
-} = require('./config');
-const {
-	Post
-} = require('./models');
+const {DATABASE_URL,PORT} = require('./config');
+const {Post} = require('./models');
 
 
 const app = express();
@@ -21,22 +16,22 @@ app.use(bodyParser.json());
 
 app.get('/posts', (req, res) => {
   Post
-		.find()
-		.exec()
-		.then(posts => {
+	.find()
+	.exec()
+	.then(posts => {
   res.json(posts.map(post => post.apiRepr()));
 });
 });
 app.get('/posts/:id', (req, res) => {
   Post
-		.findById(req.params.id)
-		.exec()
-		.then(post => {
+	.findById(req.params.id)
+	.exec()
+	.then(post => {
   res.json(post.apiRepr());
 });
 });
 app.post('/posts', (req, res) => {
-  const requiredFields = ['title', 'content'];
+  const requiredFields = ['title', 'content', 'author'];
   for (let i = 0; i < requiredFields.length; i++) {
     const field = requiredFields[i];
     if (!(field in req.body)) {
@@ -46,7 +41,7 @@ app.post('/posts', (req, res) => {
     }
   }
   Post
-		.create({
+	.create({
   title: req.body.title,
   content: req.body.content,
   author: req.body.author
@@ -59,6 +54,14 @@ app.post('/posts', (req, res) => {
 });
 
 app.put('/posts/:id', (req, res) => {
+  if (!(req.params.id && req.body.id && req.params.id === req.body.id)) {
+    const message = (
+      `Request path id (${req.params.id}) and request body id ` +
+      `(${req.body.id}) must match`);
+    console.error(message);
+    res.status(400).json({message: message});
+  }
+
   const updatedEntry = {};
   const editableFields = ['title', 'content', 'author'];
 
@@ -78,7 +81,14 @@ app.put('/posts/:id', (req, res) => {
 });
 
 
-
+app.delete('/posts/:id', (req, res) => {
+  Post
+    .findByIdAndRemove(req.params.id)
+    .exec()
+    .then(() => {
+      res.status(204).end();
+    });
+});
 
 let server;
 
@@ -119,36 +129,5 @@ if (require.main === module) {
   runServer().catch(err => console.error(err));
 }
 
-module.exports = {
-  app,
-  runServer,
-  closeServer
-};
+module.exports = { app, runServer, closeServer};
 
-// var myPost = {
-// 	title: 'Global Warming',
-// 	content: 'Ice Melting',
-// 	author: {
-// 		firstName: 'Al',
-// 		lastName: 'Gore'
-// 	},
-// 	created: new Date()
-// };
-// var myPost2 = {
-// 	title: 'Gaming',
-// 	content: 'League of Legends',
-// 	author: {
-// 		firstName: 'Sa',
-// 		lastName: 'Tan'
-// 	},
-// 	created: new Date()
-// };
-// var myPost3 = {
-// 	title: 'Gaming 2',
-// 	content: 'Dota 2',
-// 	author: {
-// 		firstName: 'Jesus',
-// 		lastName: 'Christ'
-// 	},
-// 	created: new Date()
-// };
