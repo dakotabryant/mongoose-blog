@@ -24,7 +24,7 @@ app.get('/posts', (req, res) => {
 		.find()
 		.exec()
 		.then(posts => {
-			res.json(posts);
+			res.json(posts.map(post => post.apiRepr()));
 		});
 });
 app.get('/posts/:id', (req, res) => {
@@ -32,9 +32,31 @@ app.get('/posts/:id', (req, res) => {
 		.findById(req.params.id)
 		.exec()
 		.then(post => {
-			res.json(post);
-		})
+			res.json(post.apiRepr());
+		});
 });
+app.post('/posts', (req, res) => {
+	const requiredFields = ['title', 'content'];
+	for (let i = 0; i < requiredFields.length; i++) {
+		const field = requiredFields[i];
+		if (!(field in req.body)) {
+			const message = `Missing ${field} in request body`;
+			console.error(message);
+			return res.status(400).send(message);
+		}
+	}
+	Post
+		.create({
+			title: req.body.title,
+			content: req.body.content,
+			author: req.body.author
+		})
+    .then(post => res.status(201).json(post.apiRepr()))
+    .catch(err => {
+      console.error(err);
+      res.status(500).json({error: 'You broke it'})
+    });
+})
 
 
 
@@ -83,9 +105,30 @@ module.exports = {
 	closeServer
 };
 
+// var myPost = {
+// 	title: 'Global Warming',
+// 	content: 'Ice Melting',
+// 	author: {
+// 		firstName: 'Al',
+// 		lastName: 'Gore'
+// 	},
+// 	created: new Date()
+// };
 // var myPost2 = {
-//   title: 'Global Warming',
-//   content: 'Ice Melting',
-//   author: 'Al Gore',
-//   created: new Date()
+// 	title: 'Gaming',
+// 	content: 'League of Legends',
+// 	author: {
+// 		firstName: 'Sa',
+// 		lastName: 'Tan'
+// 	},
+// 	created: new Date()
+// };
+// var myPost3 = {
+// 	title: 'Gaming 2',
+// 	content: 'Dota 2',
+// 	author: {
+// 		firstName: 'Jesus',
+// 		lastName: 'Christ'
+// 	},
+// 	created: new Date()
 // };
