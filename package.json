@@ -16,5 +16,11 @@
   "bugs": {
     "url": "https://github.com/dakotabryant/mongoose-blog/issues"
   },
-  "homepage": "https://github.com/dakotabryant/mongoose-blog#readme"
+  "homepage": "https://github.com/dakotabryant/mongoose-blog#readme",
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2",
+    "mongoose": "^4.9.7",
+    "morgan": "^1.8.1"
+  }
 }
