@@ -18,13 +18,15 @@ const postSchema = mongoose.Schema({
       type: String,
       required: true
     }
-   
+
   },
   created: {
     type: Date,
     default: Date.now
   }
 });
+
+
 postSchema.virtual('authorFullName').get(function() {
   return `${this.author.firstName} ${this.author.lastName}`;
 });
